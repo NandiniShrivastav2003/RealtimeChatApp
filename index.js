@@ -7,13 +7,13 @@ const socketio=require('socket.io');
 const io=socketio(server)
 
 io.on("connection",(socket)=>{
-    console.log('connected with socket id=',socket.id);
-    socket.on('boom',() =>{
-        console.log('boom received from',socket.id);
-    })
-    setInterval(() =>{
-        socket.emit('whizz')
-    },2000)
+   console.log('connect with socket id:',socket.id);
+   socket.on('msg_send',(data)=>{
+//      console.log('received ',data);
+    
+//    })
+socket.broadcast.emit('msg_rcvd',data);
+})
 })
 //include public folder in app
 //1st way 
