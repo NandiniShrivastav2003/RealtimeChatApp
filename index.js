@@ -6,34 +6,38 @@ const server = http.createServer(app);
 const socketio = require('socket.io');
 const io = socketio(server)
 
-let users={
-    'nandini':'2208',
+let users = {
+    'nandini': '2208',
 }
+let socketmap = {}
 
 io.on("connection", (socket) => {
     console.log('connect with socket id:', socket.id);
+    function con(s, u) {
+        s.join(u);
+        s.emit('logged-in');
+        socketmap[s.id] = u;
+    }
     socket.on('login', (data) => {
-      
-        if(users[data.username]){
-         if(data.password == users[data.username]){
-            socket.join(data.username);
-            socket.emit('logged-in');
-         }
-         else{
-            socket.emit('login-failed');
-         }
+
+        if (users[data.username]) {
+            if (data.password == users[data.username]) {
+                con(socket, data.username)
+            }
+            else {
+                socket.emit('login-failed');
+            }
         }
-        else{
-            socket.join(data.username);
-            socket.emit('logged-in');
-            users[data.username]=data.password;
-            
-            
+        else {
+            con(socket, data.username)
+            users[data.username] = data.password;
+
+
         }
-        
+
     })
     socket.on('msg-send', (data) => {
-      
+        data.from = socketmap[socket.id];
         if (data.to) {
             io.to(data.to).emit('msg_rcvd', data);
         }
